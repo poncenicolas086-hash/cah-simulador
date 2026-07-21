@@ -599,13 +599,13 @@ export default function App() {
   }, [inMatch, matchMinute, matchEnded, matchScript]);
 
   return (
-    <main className="h-screen w-screen bg-[#080808] text-white overflow-hidden flex flex-col relative select-none">
+    <main className="min-h-screen w-full bg-[#080808] text-white overflow-x-hidden flex flex-col relative select-none">
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute w-[600px] h-[600px] bg-red-600 rounded-full blur-[180px] -top-40 -left-40" />
         <div className="absolute w-[500px] h-[500px] bg-red-700 rounded-full blur-[180px] bottom-[-200px] right-[-100px]" />
       </div>
 
-      <nav className="relative z-10 flex items-center justify-between px-8 md:px-16 py-4 shrink-0">
+      <nav className="relative z-10 flex items-center justify-between px-4 sm:px-8 md:px-16 py-4 shrink-0">
         <div
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => {
@@ -617,8 +617,8 @@ export default function App() {
             H
           </div>
           <div>
-            <h1 className="font-black tracking-tight text-lg">CAH SIMULADOR</h1>
-            <p className="text-[10px] text-gray-400 tracking-widest">
+            <h1 className="font-black tracking-tight text-base sm:text-lg">CAH SIMULADOR</h1>
+            <p className="text-[9px] sm:text-[10px] text-gray-400 tracking-widest">
               CAMPEÓN COPA ARGENTINA 2014
             </p>
           </div>
@@ -635,23 +635,23 @@ export default function App() {
       </nav>
 
       {!inDraft && !inMatch ? (
-        <section className="relative z-10 flex-1 flex items-center justify-between px-8 md:px-16 max-w-7xl mx-auto w-full">
-          <div className="max-w-2xl">
-            <p className="text-red-500 font-bold tracking-[0.3em] text-sm mb-4">
+        <section className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-between px-4 sm:px-8 md:px-16 max-w-7xl mx-auto w-full my-auto py-8">
+          <div className="max-w-2xl text-center lg:text-left">
+            <p className="text-red-500 font-bold tracking-[0.3em] text-xs sm:text-sm mb-4">
               CLUB ATLÉTICO HURACÁN
             </p>
-            <h2 className="text-5xl md:text-7xl font-black leading-[0.9] tracking-tighter">
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[0.9] tracking-tighter">
               ARMÁ
               <br />
               <span className="text-red-600">
                 TU <span className="text-white">H</span>ISTORIA.
               </span>
             </h2>
-            <p className="mt-6 max-w-lg text-gray-400 text-base md:text-lg">
+            <p className="mt-6 max-w-lg mx-auto lg:mx-0 text-gray-400 text-sm sm:text-base md:text-lg">
               Armá tu plantel histórico una sola vez y guíalo desde 32avos de
               final hasta levantar la copa en la gran final.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <button
                 onClick={() => setShowMenu(true)}
                 className="group px-8 py-4 bg-red-600 hover:bg-red-700 transition-all rounded-xl font-black text-base shadow-[0_0_30px_rgba(220,38,38,0.35)] cursor-pointer"
@@ -664,7 +664,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="hidden lg:flex relative items-center justify-center">
+          <div className="hidden lg:flex relative items-center justify-center mt-10 lg:mt-0">
             <div className="absolute w-80 h-80 bg-red-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse duration-[8000ms]" />
 
             <div className="relative animate-orbit-glow cursor-pointer group">
@@ -677,8 +677,8 @@ export default function App() {
           </div>
         </section>
       ) : inDraft && !inMatch ? (
-        <section className="relative z-10 flex-1 px-6 md:px-12 max-w-7xl mx-auto w-full flex flex-col justify-center py-2">
-          <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/10">
+        <section className="relative z-10 flex-1 px-4 sm:px-6 md:px-12 max-w-7xl mx-auto w-full flex flex-col justify-center py-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-2 pb-2 border-b border-white/10 gap-2">
             <button
               onClick={() => setInDraft(false)}
               className="px-3 py-1.5 bg-white/10 hover:bg-white/25 transition rounded-lg text-xs font-bold cursor-pointer"
@@ -732,7 +732,7 @@ export default function App() {
               <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mb-3">
                 Plantel disponible (Seleccioná un jugador)
               </p>
-              <div className="max-h-[420px] overflow-y-auto pr-2 space-y-2">
+              <div className="max-h-[350px] lg:max-h-[420px] overflow-y-auto pr-2 space-y-2">
                 {currentSeason?.players.map((player: any, idx: number) => {
                   const isChosen = chosenNames.includes(player.name);
                   const hasSlots = positions.some(
@@ -781,7 +781,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="lg:col-span-7 bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 border border-emerald-500/30 rounded-2xl p-4 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[460px]">
+            <div className="lg:col-span-7 bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-950 border border-emerald-500/30 rounded-2xl p-4 shadow-2xl relative overflow-x-auto overflow-y-hidden flex flex-col justify-between min-h-[420px]">
               <div className="absolute inset-0 border-2 border-white/10 m-3 rounded-xl pointer-events-none flex flex-col items-center justify-center">
                 <div className="w-28 h-28 border border-white/10 rounded-full"></div>
                 <div className="absolute top-0 w-36 h-14 border-b border-x border-white/10"></div>
@@ -795,7 +795,7 @@ export default function App() {
                 </span>
               </div>
 
-              <div className="relative z-10 flex flex-col justify-between py-2 h-full flex-1">
+              <div className="relative z-10 flex flex-col justify-between py-2 h-full flex-1 min-w-[320px]">
                 {(() => {
                   let globalIndexCounter = 0;
                   return formationsConfig[selectedFormationKey].layout.map(
@@ -803,7 +803,7 @@ export default function App() {
                       return (
                         <div
                           key={rowIndex}
-                          className="flex justify-center items-center gap-3 px-2"
+                          className="flex justify-center items-center gap-2 sm:gap-3 px-2"
                         >
                           {rowConfig.map((item) => {
                             const currentIndex = globalIndexCounter++;
@@ -823,7 +823,7 @@ export default function App() {
                                   isAvailableToPlace &&
                                   handlePlacePlayerInField(currentIndex)
                                 }
-                                className={`w-28 shrink-0 backdrop-blur-sm border rounded-xl py-2.5 px-2 text-center shadow-lg transition-all ${
+                                className={`w-24 sm:w-28 shrink-0 backdrop-blur-sm border rounded-xl py-2 px-1.5 sm:py-2.5 sm:px-2 text-center shadow-lg transition-all ${
                                   isAvailableToPlace
                                     ? 'border-white bg-red-600/60 animate-pulse cursor-pointer shadow-[0_0_25px_rgba(255,255,255,0.7)] text-white'
                                     : selectedPlayer && pos.player === null
@@ -832,7 +832,7 @@ export default function App() {
                                 }`}
                               >
                                 <span
-                                  className={`block text-xs font-black truncate ${
+                                  className={`block text-[11px] sm:text-xs font-black truncate ${
                                     pos.player
                                       ? 'text-white'
                                       : isAvailableToPlace
@@ -871,8 +871,8 @@ export default function App() {
           )}
         </section>
       ) : (
-        <section className="relative z-10 flex-1 px-6 md:px-12 max-w-4xl mx-auto w-full flex flex-col justify-center py-6">
-          <div className="bg-[#111]/90 border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-md text-center">
+        <section className="relative z-10 flex-1 px-4 sm:px-6 md:px-12 max-w-4xl mx-auto w-full flex flex-col justify-center py-6">
+          <div className="bg-[#111]/90 border border-white/10 rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-md text-center">
             {matchEnded && (isChampion || isEliminated) ? (
               <div className="animate-fadeIn">
                 <p
@@ -884,41 +884,41 @@ export default function App() {
                     ? '🏆 ¡CAMPEÓN DE LA COPA ARGENTINA!'
                     : '❌ ELIMINADO DE LA COPA'}
                 </p>
-                <h2 className="text-3xl font-black mb-6">
+                <h2 className="text-xl sm:text-3xl font-black mb-6">
                   HURACÁN vs {rivalTeam?.name.toUpperCase()}
                 </h2>
 
-                <div className="flex items-center justify-center gap-6 bg-black/50 border border-white/10 py-6 px-8 rounded-2xl mb-6 shadow-inner">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-6 shadow-inner">
                   {/* Escudo y datos de Huracán */}
-                  <div className="text-right flex-1 flex items-center justify-end gap-3">
+                  <div className="text-center sm:text-right flex-1 flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto">
                     <div>
-                      <span className="block text-xs font-bold text-gray-400">
+                      <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         HURACÁN (⭐ {teamRating})
                       </span>
-                      <span className="text-5xl font-black text-red-500">
+                      <span className="text-4xl sm:text-5xl font-black text-red-500">
                         {matchScore.huracan}
                       </span>
                     </div>
-                    <img src="/huracanpng.png" alt="Huracán" className="w-16 h-16 object-contain" />
+                    <img src="/huracanpng.png" alt="Huracán" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
                   </div>
 
-                  <span className="text-2xl font-bold text-gray-500">-</span>
+                  <span className="text-xl sm:text-2xl font-bold text-gray-500 hidden sm:inline">-</span>
 
-                  {/* Escudo y datos del Rival (Ampliado a w-16 h-16) */}
-                  <div className="text-left flex-1 flex items-center gap-3">
-                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-16 h-16 object-contain" />
+                  {/* Escudo y datos del Rival */}
+                  <div className="text-center sm:text-left flex-1 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
                     <div>
-                      <span className="block text-xs font-bold text-gray-400">
+                      <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         {rivalTeam?.name} (⭐ {rivalTeam?.rating})
                       </span>
-                      <span className="text-5xl font-black text-white">
+                      <span className="text-4xl sm:text-5xl font-black text-white">
                         {matchScore.rival}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-6 mb-6 text-xs font-bold text-gray-300 bg-white/5 py-3 px-4 rounded-xl border border-white/5">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-6 text-xs font-bold text-gray-300 bg-white/5 py-3 px-4 rounded-xl border border-white/5">
                   <div>
                     Récord:{' '}
                     <span className="text-white">
@@ -933,7 +933,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     onClick={() => {
                       setInMatch(false);
@@ -956,41 +956,41 @@ export default function App() {
                 <p className="text-green-400 font-bold tracking-[0.2em] text-xs uppercase mb-1">
                   ¡CLASIFICADO A LA SIGUIENTE FASE!
                 </p>
-                <h2 className="text-3xl font-black mb-6">
+                <h2 className="text-xl sm:text-3xl font-black mb-6">
                   HURACÁN vs {rivalTeam?.name.toUpperCase()}
                 </h2>
 
-                <div className="flex items-center justify-center gap-6 bg-black/50 border border-white/10 py-6 px-8 rounded-2xl mb-6 shadow-inner">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-6 shadow-inner">
                   {/* Escudo y datos de Huracán */}
-                  <div className="text-right flex-1 flex items-center justify-end gap-3">
+                  <div className="text-center sm:text-right flex-1 flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto">
                     <div>
-                      <span className="block text-xs font-bold text-gray-400">
+                      <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         HURACÁN (⭐ {teamRating})
                       </span>
-                      <span className="text-5xl font-black text-red-500">
+                      <span className="text-4xl sm:text-5xl font-black text-red-500">
                         {matchScore.huracan}
                       </span>
                     </div>
-                    <img src="/huracanpng.png" alt="Huracán" className="w-16 h-16 object-contain" />
+                    <img src="/huracanpng.png" alt="Huracán" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
                   </div>
 
-                  <span className="text-2xl font-bold text-gray-500">-</span>
+                  <span className="text-xl sm:text-2xl font-bold text-gray-500 hidden sm:inline">-</span>
 
-                  {/* Escudo y datos del Rival (Ampliado a w-16 h-16) */}
-                  <div className="text-left flex-1 flex items-center gap-3">
-                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-16 h-16 object-contain" />
+                  {/* Escudo y datos del Rival */}
+                  <div className="text-center sm:text-left flex-1 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
                     <div>
-                      <span className="block text-xs font-bold text-gray-400">
+                      <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         {rivalTeam?.name} (⭐ {rivalTeam?.rating})
                       </span>
-                      <span className="text-5xl font-black text-white">
+                      <span className="text-4xl sm:text-5xl font-black text-white">
                         {matchScore.rival}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-6 mb-6 text-xs font-bold text-gray-300 bg-white/5 py-3 px-4 rounded-xl border border-white/5">
+                <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-6 text-xs font-bold text-gray-300 bg-white/5 py-3 px-4 rounded-xl border border-white/5">
                   <div>
                     Récord:{' '}
                     <span className="text-white">
@@ -1005,7 +1005,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     onClick={() => {
                       setInMatch(false);
@@ -1032,25 +1032,25 @@ export default function App() {
                 <p className="text-red-500 font-bold tracking-[0.2em] text-xs uppercase mb-2">
                   Copa Argentina • {cupStages[currentStageIndex]?.name}
                 </p>
-                <h2 className="text-3xl font-black mb-4">
+                <h2 className="text-xl sm:text-3xl font-black mb-4">
                   HURACÁN vs {rivalTeam?.name.toUpperCase()}
                 </h2>
 
-                <div className="flex items-center justify-center gap-6 bg-black/50 border border-white/10 py-6 px-8 rounded-2xl mb-4 shadow-inner relative">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-4 shadow-inner relative">
                   {/* Escudo y datos de Huracán */}
-                  <div className="text-right flex-1 flex items-center justify-end gap-3">
+                  <div className="text-center sm:text-right flex-1 flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto">
                     <div>
-                      <span className="block text-xs font-bold text-gray-400">
+                      <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         HURACÁN (⭐ {teamRating})
                       </span>
-                      <span className="text-5xl font-black text-red-500">
+                      <span className="text-4xl sm:text-5xl font-black text-red-500">
                         {matchScore.huracan}
                       </span>
                     </div>
-                    <img src="/huracanpng.png" alt="Huracán" className="w-16 h-16 object-contain" />
+                    <img src="/huracanpng.png" alt="Huracán" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
                   </div>
 
-                  <div className="flex flex-col items-center justify-center px-4 border-x border-white/10">
+                  <div className="flex flex-col items-center justify-center px-4 py-2 sm:py-0 border-y sm:border-y-0 sm:border-x border-white/10 w-full sm:w-auto">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping mb-1"></span>
                     <span className="text-lg font-black text-white tracking-widest">
                       {matchMinute}'
@@ -1060,21 +1060,21 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* Escudo y datos del Rival (Ampliado a w-16 h-16) */}
-                  <div className="text-left flex-1 flex items-center gap-3">
-                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-16 h-16 object-contain" />
+                  {/* Escudo y datos del Rival */}
+                  <div className="text-center sm:text-left flex-1 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
                     <div>
-                      <span className="block text-xs font-bold text-gray-400">
+                      <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         {rivalTeam?.name} (⭐ {rivalTeam?.rating})
                       </span>
-                      <span className="text-5xl font-black text-white">
+                      <span className="text-4xl sm:text-5xl font-black text-white">
                         {matchScore.rival}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex justify-center gap-6 mb-4 text-xs font-bold text-gray-300 bg-white/5 py-2 px-4 rounded-xl border border-white/5">
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mb-4 text-[11px] sm:text-xs font-bold text-gray-300 bg-white/5 py-2 px-3 sm:px-4 rounded-xl border border-white/5">
                   <div>
                     Récord:{' '}
                     <span className="text-white">
@@ -1082,11 +1082,11 @@ export default function App() {
                     </span>
                   </div>
                   <div>
-                    Goles a Favor (GF):{' '}
+                    GF:{' '}
                     <span className="text-emerald-400">{cupStats.gf}</span>
                   </div>
                   <div>
-                    Goles en Contra (GC):{' '}
+                    GC:{' '}
                     <span className="text-red-400">{cupStats.gc}</span>
                   </div>
                 </div>
@@ -1094,7 +1094,7 @@ export default function App() {
                 <div className="flex justify-end mb-4">
                   <button
                     onClick={finishMatchInstantly}
-                    className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 transition text-white rounded-xl text-xs font-black shadow-[0_0_15px_rgba(217,119,6,0.3)] cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-1.5 bg-amber-600 hover:bg-amber-700 transition text-white rounded-xl text-xs font-black shadow-[0_0_15px_rgba(217,119,6,0.3)] cursor-pointer"
                   >
                     ⚡ SIMULAR RÁPIDO
                   </button>
@@ -1123,8 +1123,8 @@ export default function App() {
       {showMenu && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
           <div className="bg-[#111] border border-white/10 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-            <h2 className="text-3xl font-black mb-2">MODO COPA ARGENTINA</h2>
-            <p className="text-gray-400 mb-8">
+            <h2 className="text-2xl sm:text-3xl font-black mb-2">MODO COPA ARGENTINA</h2>
+            <p className="text-gray-400 text-sm sm:text-base mb-8">
               Elegí la formación para armar tu plantel de 32avos hasta la gran
               final.
             </p>
@@ -1142,7 +1142,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setShowMenu(false)}
-              className="w-full mt-4 py-3 text-gray-400 hover:text-white cursor-pointer font-semibold transition"
+              className="w-full mt-4 py-3 text-gray-400 hover:text-white cursor-pointer font-semibold transition text-sm"
             >
               CANCELAR
             </button>
@@ -1153,8 +1153,8 @@ export default function App() {
       {showFormationModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
           <div className="bg-[#111] border border-white/10 rounded-3xl p-8 max-w-xl w-full shadow-2xl">
-            <h2 className="text-3xl font-black mb-2">ELEGIR FORMACIÓN</h2>
-            <p className="text-gray-400 mb-6">
+            <h2 className="text-2xl sm:text-3xl font-black mb-2">ELEGIR FORMACIÓN</h2>
+            <p className="text-gray-400 text-sm sm:text-base mb-6">
               Seleccioná el esquema táctico para encarar todo el torneo.
             </p>
 
