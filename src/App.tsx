@@ -723,7 +723,7 @@ export default function App() {
 
         <div className="hidden md:flex gap-8 text-sm text-gray-400">
           <button className="hover:text-white transition cursor-pointer">
-            Modo Copa
+            Modo Liga PROXIMAMENTE
           </button>
           <button 
             onClick={() => window.open('https://twitter.com/leviquemero', '_blank')}
