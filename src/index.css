@@ -1,0 +1,22 @@
+/* Definimos una animación que combina movimiento 3D y cambios de color */
+@keyframes floatOrbitAndGlow {
+  /* Punto de partida: Abajo a la derecha, sombra roja */
+  0%, 100% {
+    transform: translate(10px, 10px) rotateX(10deg) rotateY(-10deg) rotateZ(0deg);
+    filter: drop-shadow(0 15px 25px rgba(239, 68, 68, 0.7)); /* Rojo */
+  }
+  /* Mitad del ciclo: Arriba a la izquierda, sombra blanca */
+  50% {
+    transform: translate(-10px, -10px) rotateX(-10deg) rotateY(10deg) rotateZ(2deg);
+    filter: drop-shadow(0 15px 25px rgba(255, 255, 255, 0.9)); /* Blanco */
+  }
+  /* Puedes agregar más puntos intermedios para un círculo más perfecto, 
+     pero esto genera un movimiento de vaivén 3D muy elegante */
+}
+
+/* Clase de utilidad para aplicar la animación */
+.animate-orbit-glow {
+  animation: floatOrbitAndGlow 8s ease-in-out infinite;
+  /* Necesario para que funcionen las transformaciones 3D */
+  transform-style: preserve-3d;
+}
