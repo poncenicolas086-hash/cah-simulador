@@ -49,7 +49,8 @@ const huracanSeasons = [
       { name: 'Ramón Ábila', pos: 'DEL', rating: 92 },
       { name: 'Agustín Vuletich', pos: 'DEL', rating: 77 },
     ],
-    {
+  },
+  {
     season: 'Huracán 2025',
     players: [
       { name: 'Hernán Galíndez', pos: 'ARQ', rating: 84 },
@@ -64,7 +65,8 @@ const huracanSeasons = [
       { name: 'Ramón Ábila', pos: 'DEL', rating: 84 },
       { name: 'Rodrigo Cabral', pos: 'DEL', rating: 79 },
     ],
-    {
+  },
+  {
     season: 'Huracán 2011',
     players: [
       { name: 'Gastón Monzón', pos: 'ARQ', rating: 81 },
@@ -79,7 +81,8 @@ const huracanSeasons = [
       { name: 'Javier Cámpora', pos: 'DEL', rating: 85 },
       { name: 'Rolando Zárate', pos: 'DEL', rating: 80 },
     ],
-    {
+  },
+  {
     season: 'Huracán 1973 (Los Menottistas)',
     players: [
       { name: 'Héctor Roganti', pos: 'ARQ', rating: 85 },
@@ -94,7 +97,8 @@ const huracanSeasons = [
       { name: 'Roque Avallay', pos: 'DEL', rating: 86 },
       { name: 'Omar Larrosa', pos: 'DEL', rating: 87 },
     ],
-    {
+  },
+  {
     season: 'Huracán 1994',
     players: [
       { name: 'Marcos Gutiérrez', pos: 'ARQ', rating: 82 },
@@ -109,7 +113,8 @@ const huracanSeasons = [
       { name: 'Antonio Barijho', pos: 'DEL', rating: 83 },
       { name: 'Gastón Casas', pos: 'DEL', rating: 78 },
     ],
-    {
+  },
+  {
     season: 'Huracán 2007 (Ascenso)',
     players: [
       { name: 'Leonardo Díaz', pos: 'ARQ', rating: 79 },
