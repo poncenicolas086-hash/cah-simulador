@@ -708,7 +708,10 @@ export default function App() {
           <button className="hover:text-white transition cursor-pointer">
             Modo Copa
           </button>
-          <button className="hover:text-white transition cursor-pointer">
+          <button 
+            onClick={() => window.open('https://twitter.com/leviquemero', '_blank')}
+            className="hover:text-white transition cursor-pointer"
+          >
             X @leviquemero
           </button>
         </div>
