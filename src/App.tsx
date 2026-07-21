@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 // Base de datos de temporadas icónicas de Huracán
 const huracanSeasons = [
   {
-    season: 'Huracán 2009 (Los Ángeles de Cappa)',
+    season: 'Huracán 2009',
     players: [
       { name: 'Gastón Monzón', pos: 'ARQ', rating: 85 },
       { name: 'Carlos Araujo', pos: 'DEF', rating: 83 },
@@ -19,7 +19,7 @@ const huracanSeasons = [
     ],
   },
   {
-    season: 'Huracán 2014 (Ascenso a Primera)',
+    season: 'Huracán 2014',
     players: [
       { name: 'Marcos Díaz', pos: 'ARQ', rating: 88 },
       { name: 'Federico Mancinelli', pos: 'DEF', rating: 82 },
@@ -35,7 +35,7 @@ const huracanSeasons = [
     ],
   },
   {
-    season: 'Huracán 2015 (Subcampeón Sudamericana)',
+    season: 'Huracán 2015',
     players: [
       { name: 'Marcos Díaz', pos: 'ARQ', rating: 90 },
       { name: 'José San Román', pos: 'DEF', rating: 82 },
@@ -83,7 +83,7 @@ const huracanSeasons = [
     ],
   },
   {
-    season: 'Huracán 1973 (Los Menottistas)',
+    season: 'Huracán 1973',
     players: [
       { name: 'Héctor Roganti', pos: 'ARQ', rating: 85 },
       { name: 'Nelson Chabay', pos: 'DEF', rating: 83 },
@@ -766,16 +766,15 @@ export default function App() {
               ← SALIR
             </button>
             <div className="text-center">
-  <h2 className="text-red-500 font-black text-2xl md:text-3xl tracking-wide uppercase">
-    {currentSeason?.season}
-  </h2>
-  <p className="text-sm text-gray-400 mt-1">
-    Táctica:{' '}
-    <span className="text-white font-bold">
-      {formationsConfig[selectedFormationKey].name}
-    </span>
-  </p>
-</div>
+              <h2 className="text-red-500 font-black text-2xl md:text-3xl tracking-wide uppercase">
+                {currentSeason?.season}
+              </h2>
+              <p className="text-sm text-gray-400 mt-1">
+                Táctica:{' '}
+                <span className="text-white font-bold">
+                  {formationsConfig[selectedFormationKey].name}
+                </span>
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -980,14 +979,14 @@ export default function App() {
                         {matchScore.huracan}
                       </span>
                     </div>
-                    <img src="/huracanpng.png" alt="Huracán" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+                    <img src="/huracanpng.png" alt="Huracán" className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
                   </div>
 
                   <span className="text-xl sm:text-2xl font-bold text-gray-500 hidden sm:inline">-</span>
 
                   {/* Escudo y datos del Rival */}
                   <div className="text-center sm:text-left flex-1 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
                     <div>
                       <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         {rivalTeam?.name} (⭐ {rivalTeam?.rating})
@@ -1052,14 +1051,14 @@ export default function App() {
                         {matchScore.huracan}
                       </span>
                     </div>
-                    <img src="/huracanpng.png" alt="Huracán" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+                    <img src="/huracanpng.png" alt="Huracán" className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
                   </div>
 
                   <span className="text-xl sm:text-2xl font-bold text-gray-500 hidden sm:inline">-</span>
 
                   {/* Escudo y datos del Rival */}
                   <div className="text-center sm:text-left flex-1 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
                     <div>
                       <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         {rivalTeam?.name} (⭐ {rivalTeam?.rating})
@@ -1128,7 +1127,7 @@ export default function App() {
                         {matchScore.huracan}
                       </span>
                     </div>
-                    <img src="/huracanpng.png" alt="Huracán" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+                    <img src="/huracanpng.png" alt="Huracán" className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
                   </div>
 
                   <div className="flex flex-col items-center justify-center px-4 py-2 sm:py-0 border-y sm:border-y-0 sm:border-x border-white/10 w-full sm:w-auto">
@@ -1143,7 +1142,7 @@ export default function App() {
 
                   {/* Escudo y datos del Rival */}
                   <div className="text-center sm:text-left flex-1 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" />
+                    <img src={rivalTeam?.logo} alt={rivalTeam?.name} className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
                     <div>
                       <span className="block text-[10px] sm:text-xs font-bold text-gray-400">
                         {rivalTeam?.name} (⭐ {rivalTeam?.rating})
