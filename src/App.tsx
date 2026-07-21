@@ -766,15 +766,16 @@ export default function App() {
               ← SALIR
             </button>
             <div className="text-center">
-              <h2 className="text-red-500 font-black text-xs tracking-wide uppercase">
-                {currentSeason?.season}
-              </h2>
-              <p className="text-[10px] text-gray-400">
-                Táctica:{' '}
-                <span className="text-white font-bold">
-                  {formationsConfig[selectedFormationKey].name}
-                </span>
-              </p>
+  <h2 className="text-red-500 font-black text-2xl md:text-3xl tracking-wide uppercase">
+    {currentSeason?.season}
+  </h2>
+  <p className="text-sm text-gray-400 mt-1">
+    Táctica:{' '}
+    <span className="text-white font-bold">
+      {formationsConfig[selectedFormationKey].name}
+    </span>
+  </p>
+</div>
             </div>
 
             <div className="flex items-center gap-3">
