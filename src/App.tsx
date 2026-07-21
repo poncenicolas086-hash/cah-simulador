@@ -709,7 +709,7 @@ export default function App() {
             Modo Copa
           </button>
           <button className="hover:text-white transition cursor-pointer">
-            Cómo jugar
+            X @leviquemero
           </button>
         </div>
       </nav>
