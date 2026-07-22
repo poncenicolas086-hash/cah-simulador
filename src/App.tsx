@@ -563,7 +563,7 @@ export default function App() {
     setMatchScript(scriptMap);
   };
 
-  const startPenaltyShootoutSequence = (currentEvents: any[], currentScorers: any[]) => {
+  const startPenaltyShootoutSequence = (currentEvents: any[]) => {
     setInPenaltyShootout(true);
     setPenaltyStep(0);
     setPenaltyKicksLog([]);
@@ -706,7 +706,7 @@ export default function App() {
     let userWon = userGoals > rivalGoals;
   
     if (userGoals === rivalGoals && gameMode === 'cup') {
-      startPenaltyShootoutSequence(newEvents, newScorersSummary);
+      startPenaltyShootoutSequence(newEvents);
       return;
     }
   
@@ -746,7 +746,7 @@ export default function App() {
       let userWon = userGoals > rivalGoals;
 
       if (userGoals === rivalGoals && gameMode === 'cup') {
-        startPenaltyShootoutSequence(newEvents, newScorersSummary);
+        startPenaltyShootoutSequence(newEvents);
         return;
       }
 
@@ -802,7 +802,6 @@ export default function App() {
   }, [inMatch, matchMinute, matchEnded, matchScript, matchScore, inLeagueMatch, inPenaltyShootout]);
 
   const simulateRoundForTable = (fixtures: any[], table: any[], isZoneA: boolean) => {
-    // CORRECCIÓN 1: Validar fecha 0 o fuera de rango de fixtures
     if (!fixtures || fixtures.length === 0 || currentLeagueFixture >= fixtures.length) {
       return { updatedTable: table, userMatchRes: null };
     }
@@ -830,7 +829,6 @@ export default function App() {
           homeScorers.push(sc);
         }
         for (let i = 0; i < awayGoals; i++) {
-          // CORRECCIÓN 3: Goleadores aislados correctamente al equipo visitante correspondiente
           awayScorers.push(`Delantero de ${match.away.name}`);
         }
 
@@ -841,7 +839,6 @@ export default function App() {
         awayGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff > 8 ? 1 : 0));
 
         for (let i = 0; i < homeGoals; i++) {
-          // CORRECCIÓN 3: Goleadores aislados correctamente al equipo local correspondiente
           homeScorers.push(`Delantero de ${match.home.name}`);
         }
         for (let i = 0; i < awayGoals; i++) {
@@ -883,10 +880,8 @@ export default function App() {
   };
 
   const simulateLeagueRound = () => {
-    // CORRECCIÓN 1: Evitar ejecución si no hay fixtures cargados o ya terminó
     if (!leagueFixturesA || leagueFixturesA.length === 0 || currentLeagueFixture >= leagueFixturesA.length) return;
 
-    // CORRECCIÓN 5: Simulación simultánea paralela de Zona A y Zona B en cada fecha
     const resA = simulateRoundForTable(leagueFixturesA, leagueTableA, true);
     const resB = simulateRoundForTable(leagueFixturesB, leagueTableB, false);
 
@@ -897,7 +892,6 @@ export default function App() {
     const nextFixture = currentLeagueFixture + 1;
     setCurrentLeagueFixture(nextFixture);
 
-    // CORRECCIÓN 2: Validar fin de temporada regular antes de pasar a playoffs
     if (nextFixture >= leagueFixturesA.length) {
       setupPlayoffs(resA.updatedTable, resB.updatedTable);
     }
@@ -967,7 +961,6 @@ export default function App() {
   };
 
   const advancePlayoffRound = () => {
-    // CORRECCIÓN 4: Comportamiento estricto si el usuario fue eliminado
     if (!playoffUserMatchResult?.userWon) {
       setIsEliminated(true);
       return;
