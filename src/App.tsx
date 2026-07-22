@@ -563,7 +563,7 @@ export default function App() {
     setMatchScript(scriptMap);
   };
 
-  const startPenaltyShootoutSequence = (currentEvents: any[]) => {
+  const startPenaltyShootoutSequence = (currentEvents: any[], currentScorers: any[]) => {
     setInPenaltyShootout(true);
     setPenaltyStep(0);
     setPenaltyKicksLog([]);
