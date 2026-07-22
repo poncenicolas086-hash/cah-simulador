@@ -322,6 +322,7 @@ export default function App() {
   const [rivalTeam, setRivalTeam] = useState<any>(null);
   const [matchScore, setMatchScore] = useState({ huracan: 0, rival: 0 });
   const [matchEvents, setMatchEvents] = useState<string[]>([]);
+  const [matchScorersSummary, setMatchScorersSummary] = useState<string[]>([]);
   const [matchMinute, setMatchMinute] = useState(0);
   const [matchEnded, setMatchEnded] = useState(false);
   const [matchScript, setMatchScript] = useState<{
@@ -329,6 +330,7 @@ export default function App() {
       huracanGoal: boolean;
       rivalGoal: boolean;
       text: string;
+      scorerName?: string;
     };
   }>({});
   const [isEliminated, setIsEliminated] = useState(false);
@@ -456,6 +458,7 @@ export default function App() {
     setMatchEvents([
       `⏱️ 0' - ¡Comienza el partido de ${stage.name} frente a ${randomRival.name}! El Globo va por la gloria.`,
     ]);
+    setMatchScorersSummary([]);
     setMatchMinute(0);
     setMatchEnded(false);
     setInMatch(true);
@@ -464,7 +467,6 @@ export default function App() {
     let hGoalsCount = 0;
     let rGoalsCount = 0;
 
-    // LÓGICA DE GOLES BALANCEADA (Evita goleadas absurdas)
     const baseChance = 0.25; 
     const ratingFactor = diff * 0.008;
 
@@ -475,7 +477,6 @@ export default function App() {
       rGoalsCount += Math.random() < 0.7 ? 1 : 2;
     }
 
-    // Tope estricto realista para partidos de eliminación directa
     hGoalsCount = Math.min(hGoalsCount, 3);
     rGoalsCount = Math.min(rGoalsCount, 3);
 
@@ -487,7 +488,6 @@ export default function App() {
       }
     }
     
-    // Asegurar que no se pasen de un marcador razonable (máx 4 goles en total la mayoría de las veces)
     hGoalsCount = Math.min(hGoalsCount, 3);
     rGoalsCount = Math.min(rGoalsCount, 3);
 
@@ -496,18 +496,36 @@ export default function App() {
         huracanGoal: boolean;
         rivalGoal: boolean;
         text: string;
+        scorerName?: string;
       };
     } = {};
     const availableMinutes = Array.from({ length: 84 }, (_, i) => i + 4);
+
+    const huracanSquadPlayers = positions
+      .filter((p) => p.player !== null)
+      .map((p) => p.player);
+
+    const rivalScorersPool = [
+      `Delantero de ${randomRival.name}`,
+      `Mediocampista de ${randomRival.name}`,
+      `Figura de ${randomRival.name}`
+    ];
 
     for (let i = 0; i < hGoalsCount; i++) {
       if (availableMinutes.length === 0) break;
       const randIdx = Math.floor(Math.random() * availableMinutes.length);
       const min = availableMinutes.splice(randIdx, 1)[0];
+      
+      const randomScorer =
+        huracanSquadPlayers.length > 0
+          ? huracanSquadPlayers[Math.floor(Math.random() * huracanSquadPlayers.length)].name
+          : 'Jugador de Huracán';
+
       scriptMap[min] = {
         huracanGoal: true,
         rivalGoal: false,
-        text: `⚽ ¡GOOOOL DE HURACÁN! Tremenda definición para desatar la locura en las tribunas.`,
+        scorerName: randomScorer,
+        text: `⚽ ¡GOOOOL DE HURACÁN! Tremenda definición de ${randomScorer} para desatar la locura en las tribunas.`,
       };
     }
 
@@ -515,10 +533,14 @@ export default function App() {
       if (availableMinutes.length === 0) break;
       const randIdx = Math.floor(Math.random() * availableMinutes.length);
       const min = availableMinutes.splice(randIdx, 1)[0];
+      
+      const randomRivalScorer = rivalScorersPool[Math.floor(Math.random() * rivalScorersPool.length)];
+
       scriptMap[min] = {
         huracanGoal: false,
         rivalGoal: true,
-        text: `⚽ Gol de ${randomRival.name}. Desatención defensiva que aprovecha el rival.`,
+        scorerName: randomRivalScorer,
+        text: `⚽ Gol de ${randomRival.name} (${randomRivalScorer}). Desatención defensiva que aprovecha el rival.`,
       };
     }
 
@@ -557,7 +579,6 @@ export default function App() {
     const rivalRating = rivalTeam?.rating || 75;
     const ratingDiff = teamRating - rivalRating;
 
-    // Probabilidades moderadas para simulación rápida
     const userGoalChance = Math.min(
       Math.max(0.12 + ratingDiff * 0.01, 0.05),
       0.25
@@ -568,6 +589,10 @@ export default function App() {
     );
 
     const newEvents = [...matchEvents];
+    const newScorersSummary = [...matchScorersSummary];
+    const huracanSquadPlayers = positions
+      .filter((p) => p.player !== null)
+      .map((p) => p.player);
 
     for (
       let min = startMinute;
@@ -576,19 +601,22 @@ export default function App() {
     ) {
       const rand = Math.random();
 
-      // Control para evitar acumulación excesiva de goles
       if (userGoals + rivalGoals >= 5) break;
 
       if (rand < userGoalChance) {
         userGoals++;
-        newEvents.unshift(
-          `⚽ Min ${min}': ¡GOL DE HURACÁN! (${userGoals} - ${rivalGoals})`
-        );
+        const scorer = huracanSquadPlayers.length > 0 
+          ? huracanSquadPlayers[Math.floor(Math.random() * huracanSquadPlayers.length)].name 
+          : 'Jugador';
+        const goalLineStr = `${min}' + ${scorer} + (${userGoals}-${rivalGoals})`;
+        newEvents.unshift(`⚽ Min ${min}': ¡GOL DE HURACÁN! ${scorer} (${userGoals} - ${rivalGoals})`);
+        newScorersSummary.push(goalLineStr);
       } else if (rand < userGoalChance + rivalGoalChance) {
         rivalGoals++;
-        newEvents.unshift(
-          `⚽ Min ${min}': ¡GOL DE ${rivalTeam?.name.toUpperCase()}! (${userGoals} - ${rivalGoals})`
-        );
+        const rivalScorer = `Delantero de ${rivalTeam?.name}`;
+        const goalLineStr = `${min}' + ${rivalScorer} + (${userGoals}-${rivalGoals})`;
+        newEvents.unshift(`⚽ Min ${min}': ¡GOL DE ${rivalTeam?.name.toUpperCase()}! ${rivalScorer} (${userGoals} - ${rivalGoals})`);
+        newScorersSummary.push(goalLineStr);
       }
     }
 
@@ -611,6 +639,7 @@ export default function App() {
 
     setMatchScore({ huracan: userGoals, rival: rivalGoals });
     setMatchEvents(newEvents);
+    setMatchScorersSummary(newScorersSummary);
     setMatchMinute(90);
     setMatchEnded(true);
 
@@ -671,10 +700,19 @@ export default function App() {
 
       const eventData = matchScript[nextMinute];
       if (eventData) {
-        setMatchScore((prevScore) => ({
-          huracan: prevScore.huracan + (eventData.huracanGoal ? 1 : 0),
-          rival: prevScore.rival + (eventData.rivalGoal ? 1 : 0),
-        }));
+        const updatedHuracan = matchScore.huracan + (eventData.huracanGoal ? 1 : 0);
+        const updatedRival = matchScore.rival + (eventData.rivalGoal ? 1 : 0);
+
+        setMatchScore({
+          huracan: updatedHuracan,
+          rival: updatedRival,
+        });
+
+        if ((eventData.huracanGoal || eventData.rivalGoal) && eventData.scorerName) {
+          const goalLineStr = `${nextMinute}' + ${eventData.scorerName} + (${updatedHuracan}-${updatedRival})`;
+          setMatchScorersSummary((prev) => [...prev, goalLineStr]);
+        }
+
         setMatchEvents((prev) => [
           `⏱️ ${nextMinute}' - ${eventData.text}`,
           ...prev,
@@ -693,7 +731,7 @@ export default function App() {
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [inMatch, matchMinute, matchEnded, matchScript]);
+  }, [inMatch, matchMinute, matchEnded, matchScript, matchScore]);
 
   return (
     <main className="min-h-screen w-full bg-[#080808] text-white overflow-x-hidden flex flex-col relative select-none">
@@ -988,7 +1026,7 @@ export default function App() {
                   HURACÁN vs {rivalTeam?.name.toUpperCase()}
                 </h2>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-6 shadow-inner">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-4 shadow-inner">
                   {/* Escudo y datos de Huracán */}
                   <div className="text-center sm:text-right flex-1 flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto">
                     <div>
@@ -1017,6 +1055,19 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {matchScorersSummary.length > 0 && (
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 mb-4 text-left">
+                    <p className="text-[11px] font-black uppercase text-red-500 mb-2 tracking-wider">Goles del partido:</p>
+                    <ul className="space-y-1">
+                      {matchScorersSummary.map((goalStr, idx) => (
+                        <li key={idx} className="text-xs font-bold text-gray-200">
+                          {goalStr}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-6 text-xs font-bold text-gray-300 bg-white/5 py-3 px-4 rounded-xl border border-white/5">
                   <div>
@@ -1060,7 +1111,7 @@ export default function App() {
                   HURACÁN vs {rivalTeam?.name.toUpperCase()}
                 </h2>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-6 shadow-inner">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-black/50 border border-white/10 py-4 sm:py-6 px-4 sm:px-8 rounded-2xl mb-4 shadow-inner">
                   {/* Escudo y datos de Huracán */}
                   <div className="text-center sm:text-right flex-1 flex flex-col sm:flex-row items-center justify-end gap-3 w-full sm:w-auto">
                     <div>
@@ -1089,6 +1140,19 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+
+                {matchScorersSummary.length > 0 && (
+                  <div className="bg-black/50 border border-white/10 rounded-2xl p-4 mb-4 text-left">
+                    <p className="text-[11px] font-black uppercase text-red-500 mb-2 tracking-wider">Goles del partido:</p>
+                    <ul className="space-y-1">
+                      {matchScorersSummary.map((goalStr, idx) => (
+                        <li key={idx} className="text-xs font-bold text-gray-200">
+                          {goalStr}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-6 text-xs font-bold text-gray-300 bg-white/5 py-3 px-4 rounded-xl border border-white/5">
                   <div>
