@@ -302,6 +302,14 @@ export default function App() {
   // Estados del Modo Liga y Copa
   const [gameMode, setGameMode] = useState<'cup' | 'league'>('cup');
   const [showLeagueModal, setShowLeagueModal] = useState(false);
+  const [showLeagueSetupModal, setShowLeagueSetupModal] = useState(false);
+  
+  // Estados para el armado interactivo de Zonas
+  const [zoneSetupMode, setZoneSetupMode] = useState<'original' | 'manual' | 'random'>('original');
+  const [unassignedTeams, setUnassignedTeams] = useState<any[]>([]);
+  const [manualZoneA, setManualZoneA] = useState<any[]>([]);
+  const [manualZoneB, setManualZoneB] = useState<any[]>([]);
+
   const [leagueTableA, setLeagueTableA] = useState<any[]>([]);
   const [leagueTableB, setLeagueTableB] = useState<any[]>([]);
   const [currentLeagueFixture, setCurrentLeagueFixture] = useState<number>(0);
@@ -359,6 +367,7 @@ export default function App() {
     setSelectedPlayer(null);
     setShowFormationModal(false);
     setShowLeagueModal(false);
+    setShowLeagueSetupModal(false);
     setShowMenu(false);
     setInDraft(true);
     setInMatch(false);
@@ -370,15 +379,36 @@ export default function App() {
     setInPenaltyShootout(false);
   };
 
-  const initLeagueTournament = () => {
-    const shuffledRivals = [...allTeams].sort(() => 0.5 - Math.random());
-    
-    const teamsA = [
-      { name: 'Huracán', rating: teamRating, logo: '/huracanpng.png', isUser: true },
-      ...shuffledRivals.slice(0, 14).map(t => ({ ...t, isUser: false }))
-    ];
+  const handleDraftComplete = () => {
+    if (gameMode === 'league') {
+      setUnassignedTeams([...allTeams]);
+      setManualZoneA([{ name: 'Huracán', rating: teamRating, logo: '/huracanpng.png', isUser: true }]);
+      setManualZoneB([]);
+      setShowLeagueSetupModal(true);
+    } else {
+      prepareMatchForCurrentStage();
+    }
+  };
 
-    const teamsB = shuffledRivals.slice(14, 29).map(t => ({ ...t, isUser: false }));
+  const initLeagueTournamentWithConfig = (method: 'original' | 'manual' | 'random', customA?: any[], customB?: any[]) => {
+    let teamsA: any[] = [];
+    let teamsB: any[] = [];
+
+    const huracanObj = { name: 'Huracán', rating: teamRating, logo: '/huracanpng.png', isUser: true };
+
+    if (method === 'original') {
+      const shuffledRivals = [...allTeams].sort(() => 0.5 - Math.random());
+      teamsA = [huracanObj, ...shuffledRivals.slice(0, 14).map(t => ({ ...t, isUser: false }))];
+      teamsB = shuffledRivals.slice(14, 28).map(t => ({ ...t, isUser: false }));
+    } else if (method === 'manual') {
+      teamsA = customA && customA.length > 0 ? customA : [huracanObj];
+      teamsB = customB && customB.length > 0 ? customB : allTeams.slice(0, 14);
+    } else if (method === 'random') {
+      const shuffledRivals = [...allTeams].sort(() => 0.5 - Math.random());
+      const half = Math.floor(shuffledRivals.length / 2);
+      teamsA = [huracanObj, ...shuffledRivals.slice(0, half).map(t => ({ ...t, isUser: false }))];
+      teamsB = shuffledRivals.slice(half).map(t => ({ ...t, isUser: false }));
+    }
 
     const createTable = (teams: any[]) => teams.map(t => ({
       name: t.name,
@@ -391,28 +421,72 @@ export default function App() {
     setLeagueTableA(createTable(teamsA));
     setLeagueTableB(createTable(teamsB));
 
-    const generateFixtures = (teams: any[]) => {
-      const fixtures: any[] = [];
-      const numTeams = teams.length;
-      const rounds = numTeams - 1;
-      for (let round = 0; round < rounds; round++) {
-        const roundMatches: any[] = [];
-        for (let i = 0; i < numTeams / 2; i++) {
-          const home = (round + i) % (numTeams - 1);
-          let away = (numTeams - 1 - round + i) % (numTeams - 1);
-          if (i === 0) away = numTeams - 1;
-          roundMatches.push({ home: teams[home], away: teams[away] });
+    const generateFixturesWithInterzonal = (listA: any[], listB: any[]) => {
+      const arrA = [...listA];
+      const arrB = [...listB];
+
+      if (arrA.length % 2 !== 0) arrA.push({ name: 'LIBRE_A', rating: 0, isDummy: true });
+      if (arrB.length % 2 !== 0) arrB.push({ name: 'LIBRE_B', rating: 0, isDummy: true });
+
+      const rounds = Math.max(arrA.length, arrB.length) - 1;
+      const fixturesA: any[] = [];
+      const fixturesB: any[] = [];
+
+      let listA_rot = [...arrA];
+      let listB_rot = [...arrB];
+
+      for (let r = 0; r < rounds; r++) {
+        const roundMatchesA: any[] = [];
+        const roundMatchesB: any[] = [];
+
+        let freeTeamA: any = null;
+        let freeTeamB: any = null;
+
+        const halfA = listA_rot.length / 2;
+        for (let i = 0; i < halfA; i++) {
+          const home = listA_rot[i];
+          const away = listA_rot[listA_rot.length - 1 - i];
+          if (home.isDummy) freeTeamA = away;
+          else if (away.isDummy) freeTeamA = home;
+          else roundMatchesA.push({ home, away });
         }
-        fixtures.push(roundMatches);
+
+        const halfB = listB_rot.length / 2;
+        for (let i = 0; i < halfB; i++) {
+          const home = listB_rot[i];
+          const away = listB_rot[listB_rot.length - 1 - i];
+          if (home.isDummy) freeTeamB = away;
+          else if (away.isDummy) freeTeamB = home;
+          else roundMatchesB.push({ home, away });
+        }
+
+        if (freeTeamA && freeTeamB) {
+          roundMatchesA.push({ home: freeTeamA, away: freeTeamB, isInterzonal: true });
+        } else {
+          if (freeTeamA) roundMatchesA.push({ home: freeTeamA, away: null, isFree: true });
+          if (freeTeamB) roundMatchesB.push({ home: freeTeamB, away: null, isFree: true });
+        }
+
+        fixturesA.push(roundMatchesA);
+        fixturesB.push(roundMatchesB);
+
+        const tempA = listA_rot.pop();
+        listA_rot.splice(1, 0, tempA);
+        const tempB = listB_rot.pop();
+        listB_rot.splice(1, 0, tempB);
       }
-      return fixtures;
+
+      return { fixturesA, fixturesB };
     };
 
-    setLeagueFixturesA(generateFixtures(teamsA));
-    setLeagueFixturesB(generateFixtures(teamsB));
+    const { fixturesA, fixturesB } = generateFixturesWithInterzonal(teamsA, teamsB);
+
+    setLeagueFixturesA(fixturesA);
+    setLeagueFixturesB(fixturesB);
     setCurrentLeagueFixture(0);
     setLeaguePhase('regular');
     setInDraft(false);
+    setShowLeagueSetupModal(false);
     setInMatch(true);
     setInLeagueMatch(true);
     setLeagueMatchData(null);
@@ -482,11 +556,6 @@ export default function App() {
     : 0;
 
   const prepareMatchForCurrentStage = () => {
-    if (gameMode === 'league') {
-      initLeagueTournament();
-      return;
-    }
-
     const stage = cupStages[currentStageIndex];
     const randomRival = getRandomRivalForStage(currentStageIndex);
     
@@ -625,11 +694,6 @@ export default function App() {
       } else if (rScoredNow > hScoredNow + roundsLeftH) {
         shootoutFinished = true;
         userWon = false;
-      }
-    } else if (kicksDone >= 10 && kicksDone % 2 === 0) {
-      if (hScoredNow !== rScoredNow) {
-        shootoutFinished = true;
-        userWon = hScoredNow > rScoredNow;
       }
     }
 
@@ -801,99 +865,114 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [inMatch, matchMinute, matchEnded, matchScript, matchScore, inLeagueMatch, inPenaltyShootout]);
 
-  const simulateRoundForTable = (fixtures: any[], table: any[], isZoneA: boolean) => {
-    if (!fixtures || fixtures.length === 0 || currentLeagueFixture >= fixtures.length) {
-      return { updatedTable: table, userMatchRes: null };
-    }
+  const processMatchResult = (tableA: any[], tableB: any[], match: any) => {
+    if (!match || !match.home || !match.away) return null;
 
-    const currentMatches = fixtures[currentLeagueFixture];
+    const homeIsUser = match.home?.isUser ?? false;
+    const awayIsUser = match.away?.isUser ?? false;
+    let homeGoals = 0;
+    let awayGoals = 0;
+    let homeScorers: string[] = [];
+    let awayScorers: string[] = [];
     let userMatchRes: any = null;
-    const updatedTable = [...table];
+
     const huracanSquadPlayers = positions.filter((p) => p.player !== null).map((p) => p.player);
 
-    currentMatches.forEach((match: any) => {
-      const homeIsUser = match.home.isUser;
-      const awayIsUser = match.away.isUser;
-      let homeGoals = 0;
-      let awayGoals = 0;
-      let homeScorers: string[] = [];
-      let awayScorers: string[] = [];
-
-      if (homeIsUser && isZoneA) {
-        const diff = teamRating - match.away.rating;
-        homeGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff > 8 ? 1 : 0));
-        awayGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff < 0 ? 1 : 0));
-        
-        for (let i = 0; i < homeGoals; i++) {
-          const sc = huracanSquadPlayers.length > 0 ? huracanSquadPlayers[Math.floor(Math.random() * huracanSquadPlayers.length)].name : 'Jugador';
-          homeScorers.push(sc);
-        }
-        for (let i = 0; i < awayGoals; i++) {
-          awayScorers.push(`Delantero de ${match.away.name}`);
-        }
-
-        userMatchRes = { opponent: match.away, isHome: true, homeGoals, awayGoals, homeScorers, awayScorers };
-      } else if (awayIsUser && isZoneA) {
-        const diff = teamRating - match.home.rating;
-        homeGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff < 0 ? 1 : 0));
-        awayGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff > 8 ? 1 : 0));
-
-        for (let i = 0; i < homeGoals; i++) {
-          homeScorers.push(`Delantero de ${match.home.name}`);
-        }
-        for (let i = 0; i < awayGoals; i++) {
-          const sc = huracanSquadPlayers.length > 0 ? huracanSquadPlayers[Math.floor(Math.random() * huracanSquadPlayers.length)].name : 'Jugador';
-          awayScorers.push(sc);
-        }
-
-        userMatchRes = { opponent: match.home, isHome: false, homeGoals, awayGoals, homeScorers, awayScorers };
-      } else {
-        const diff = match.home.rating - match.away.rating;
-        homeGoals = Math.max(0, Math.floor(Math.random() * 3) + (diff > 5 ? 1 : 0));
-        awayGoals = Math.max(0, Math.floor(Math.random() * 3) + (diff < -5 ? 1 : 0));
+    if (homeIsUser) {
+      const awayRating = match.away?.rating ?? 70;
+      const awayName = match.away?.name ?? 'Visitante';
+      
+      const diff = teamRating - awayRating;
+      homeGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff > 8 ? 1 : 0));
+      awayGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff < 0 ? 1 : 0));
+      
+      for (let i = 0; i < homeGoals; i++) {
+        const sc = huracanSquadPlayers.length > 0 ? huracanSquadPlayers[Math.floor(Math.random() * huracanSquadPlayers.length)].name : 'Jugador';
+        homeScorers.push(sc);
+      }
+      for (let i = 0; i < awayGoals; i++) {
+        awayScorers.push(`Delantero de ${awayName}`);
       }
 
-      const homeRow = updatedTable.find(t => t.name === match.home.name);
-      const awayRow = updatedTable.find(t => t.name === match.away.name);
+      userMatchRes = { opponent: match.away, isHome: true, homeGoals, awayGoals, homeScorers, awayScorers };
+    } else if (awayIsUser) {
+      const diff = teamRating - (match.home?.rating ?? 70);
+      homeGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff < 0 ? 1 : 0));
+      awayGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff > 8 ? 1 : 0));
 
-      if (homeRow) {
-        homeRow.pj += 1; homeRow.gf += homeGoals; homeRow.gc += awayGoals; homeRow.dg = homeRow.gf - homeRow.gc;
-        if (homeGoals > awayGoals) { homeRow.g += 1; homeRow.pts += 3; }
-        else if (homeGoals === awayGoals) { homeRow.e += 1; homeRow.pts += 1; }
-        else { homeRow.p += 1; }
+      for (let i = 0; i < homeGoals; i++) {
+        homeScorers.push(`Delantero de ${match.home?.name ?? 'Local'}`);
       }
-      if (awayRow) {
-        awayRow.pj += 1; awayRow.gf += awayGoals; awayRow.gc += homeGoals; awayRow.dg = awayRow.gf - awayRow.gc;
-        if (awayGoals > homeGoals) { awayRow.g += 1; awayRow.pts += 3; }
-        else if (awayGoals === homeGoals) { awayRow.e += 1; awayRow.pts += 1; }
-        else { awayRow.p += 1; }
+      for (let i = 0; i < awayGoals; i++) {
+        const sc = huracanSquadPlayers.length > 0 ? huracanSquadPlayers[Math.floor(Math.random() * huracanSquadPlayers.length)].name : 'Jugador';
+        awayScorers.push(sc);
       }
-    });
 
-    updatedTable.sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts;
-      if (b.dg !== a.dg) return b.dg - a.dg;
-      return b.gf - a.gf;
-    });
+      userMatchRes = { opponent: match.home, isHome: false, homeGoals, awayGoals, homeScorers, awayScorers };
+    } else {
+      const diff = (match.home?.rating ?? 70) - (match.away?.rating ?? 70);
+      homeGoals = Math.max(0, Math.floor(Math.random() * 3) + (diff > 5 ? 1 : 0));
+      awayGoals = Math.max(0, Math.floor(Math.random() * 3) + (diff < -5 ? 1 : 0));
+    }
 
-    return { updatedTable, userMatchRes };
+    const updateTeamInTable = (tableName: string, gFor: number, gAg: number) => {
+      let targetTable = tableA.some(t => t.name === tableName) ? tableA : tableB;
+      const row = targetTable.find(t => t.name === tableName);
+      if (row) {
+        row.pj += 1; row.gf += gFor; row.gc += gAg; row.dg = row.gf - row.gc;
+        if (gFor > gAg) { row.g += 1; row.pts += 3; }
+        else if (gFor === gAg) { row.e += 1; row.pts += 1; }
+        else { row.p += 1; }
+      }
+    };
+
+    updateTeamInTable(match.home.name, homeGoals, awayGoals);
+    updateTeamInTable(match.away.name, awayGoals, homeGoals);
+
+    return userMatchRes;
   };
 
   const simulateLeagueRound = () => {
     if (!leagueFixturesA || leagueFixturesA.length === 0 || currentLeagueFixture >= leagueFixturesA.length) return;
 
-    const resA = simulateRoundForTable(leagueFixturesA, leagueTableA, true);
-    const resB = simulateRoundForTable(leagueFixturesB, leagueTableB, false);
+    const currentMatchesA = leagueFixturesA[currentLeagueFixture];
+    const currentMatchesB = leagueFixturesB[currentLeagueFixture];
 
-    setLeagueTableA(resA.updatedTable);
-    setLeagueTableB(resB.updatedTable);
-    setLeagueMatchData(resA.userMatchRes);
+    let userMatchRes: any = null;
+    const updatedTableA = [...leagueTableA];
+    const updatedTableB = [...leagueTableB];
+
+    currentMatchesA.forEach((match: any) => {
+      const res = processMatchResult(updatedTableA, updatedTableB, match);
+      if (res) userMatchRes = res;
+    });
+
+    currentMatchesB.forEach((match: any) => {
+      if (match && !match.isInterzonal && !match.isFree) {
+        processMatchResult(updatedTableA, updatedTableB, match);
+      }
+    });
+
+    const sortTable = (t: any[]) => {
+      t.sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        if (b.dg !== a.dg) return b.dg - a.dg;
+        return b.gf - a.gf;
+      });
+    };
+
+    sortTable(updatedTableA);
+    sortTable(updatedTableB);
+
+    setLeagueTableA(updatedTableA);
+    setLeagueTableB(updatedTableB);
+    setLeagueMatchData(userMatchRes);
 
     const nextFixture = currentLeagueFixture + 1;
     setCurrentLeagueFixture(nextFixture);
 
     if (nextFixture >= leagueFixturesA.length) {
-      setupPlayoffs(resA.updatedTable, resB.updatedTable);
+      setupPlayoffs(updatedTableA, updatedTableB);
     }
   };
 
@@ -919,11 +998,11 @@ export default function App() {
   };
 
   const simulatePlayoffMatchUser = (match: any) => {
-    const isTeam1User = match.team1.isUser;
+    const isTeam1User = match.team1?.isUser ?? false;
     const userTeam = isTeam1User ? match.team1 : match.team2;
     const rivalObj = isTeam1User ? match.team2 : match.team1;
 
-    const diff = teamRating - rivalObj.rating;
+    const diff = teamRating - (rivalObj?.rating ?? 70);
     let userGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff > 5 ? 1 : 0));
     let rivalGoals = Math.max(0, Math.floor(Math.random() * 2) + (diff < 0 ? 1 : 0));
 
@@ -944,14 +1023,14 @@ export default function App() {
       userScorers.push(sc);
     }
     for (let i = 0; i < actualRivalGoals; i++) {
-      rivalScorers.push(`Delantero de ${rivalObj.name}`);
+      rivalScorers.push(`Delantero de ${rivalObj?.name ?? 'Rival'}`);
     }
 
     const userWon = actualUserGoals > actualRivalGoals;
     
     setPlayoffUserMatchResult({
-      userTeam: userTeam.name,
-      rivalTeam: rivalObj.name,
+      userTeam: userTeam?.name ?? 'Huracán',
+      rivalTeam: rivalObj?.name ?? 'Rival',
       userGoals: actualUserGoals,
       rivalGoals: actualRivalGoals,
       userScorers,
@@ -968,13 +1047,15 @@ export default function App() {
 
     const updatedMatches = [...playoffMatches];
     const currentM = updatedMatches[currentPlayoffMatchIndex];
-    currentM.winner = currentM.team1.isUser ? currentM.team1 : (currentM.team2.isUser ? currentM.team2 : currentM.team1);
+    if (currentM) {
+      currentM.winner = currentM.team1?.isUser ? currentM.team1 : (currentM.team2?.isUser ? currentM.team2 : currentM.team1);
+    }
 
     for (let i = 0; i < updatedMatches.length; i++) {
       if (!updatedMatches[i].winner) {
         const t1 = updatedMatches[i].team1;
         const t2 = updatedMatches[i].team2;
-        updatedMatches[i].winner = t1.rating >= t2.rating ? t1 : t2;
+        updatedMatches[i].winner = (t1?.rating ?? 0) >= (t2?.rating ?? 0) ? t1 : t2;
       }
     }
 
@@ -985,11 +1066,13 @@ export default function App() {
 
     const nextRoundWinners = [];
     for (let i = 0; i < updatedMatches.length; i += 2) {
-      nextRoundWinners.push({
-        team1: updatedMatches[i].winner,
-        team2: updatedMatches[i+1].winner,
-        winner: null
-      });
+      if (updatedMatches[i] && updatedMatches[i+1]) {
+        nextRoundWinners.push({
+          team1: updatedMatches[i].winner,
+          team2: updatedMatches[i+1].winner,
+          winner: null
+        });
+      }
     }
 
     setPlayoffMatches(nextRoundWinners);
@@ -1056,7 +1139,7 @@ export default function App() {
               </span>
             </h2>
             <p className="mt-6 max-w-lg mx-auto lg:mx-0 text-gray-400 text-sm sm:text-base md:text-lg">
-              Armá tu plantel histórico una sola vez y guíalo en la Copa Argentina o en el Modo Liga con dos zonas y Playoffs.
+              Armá tu plantel histórico una sola vez y guíalo en la Copa Argentina o en el Modo Liga con dos zonas, interzonal y Playoffs.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <button
@@ -1071,7 +1154,7 @@ export default function App() {
 
           <div className="hidden lg:flex relative items-center justify-center mt-10 lg:mt-0">
             <div className="absolute w-80 h-80 bg-red-600/10 rounded-full blur-[120px] pointer-events-none animate-pulse duration-[8000ms]" />
-            <div className="relative animate-orbit-glow cursor-pointer group">
+            <div className="relative cursor-pointer group">
               <img
                 src="/huracanpng.png"
                 alt="Escudo Huracán"
@@ -1211,10 +1294,10 @@ export default function App() {
           {isTeamComplete && (
             <div className="mt-3">
               <button
-                onClick={prepareMatchForCurrentStage}
+                onClick={handleDraftComplete}
                 className="w-full py-3 bg-green-600 hover:bg-green-700 transition font-black rounded-xl text-xs shadow-[0_0_20px_rgba(22,163,74,0.4)] cursor-pointer"
               >
-                {gameMode === 'league' ? 'INICIAR MODO LIGA (ZONA A y B)' : `COMENZAR COPA ARGENTINA (${cupStages[currentStageIndex].name})`}
+                {gameMode === 'league' ? 'CONFIGURAR ZONAS Y ZAFAR DE GRUPOS →' : `COMENZAR COPA ARGENTINA (${cupStages[currentStageIndex].name})`}
               </button>
             </div>
           )}
@@ -1244,7 +1327,7 @@ export default function App() {
             {leaguePhase === 'regular' ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-6 overflow-x-auto bg-black/40 p-4 rounded-2xl border border-white/10">
-                  <h3 className="font-black text-xs text-red-400 mb-2 uppercase">Zona A (Con Huracán)</h3>
+                  <h3 className="font-black text-xs text-red-400 mb-2 uppercase">Zona A (Huracán)</h3>
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-white/10 text-gray-400">
@@ -1274,7 +1357,7 @@ export default function App() {
                 </div>
 
                 <div className="lg:col-span-6 overflow-x-auto bg-black/40 p-4 rounded-2xl border border-white/10">
-                  <h3 className="font-black text-xs text-amber-400 mb-2 uppercase">Zona B (Simultáneo)</h3>
+                  <h3 className="font-black text-xs text-amber-400 mb-2 uppercase">Zona B</h3>
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-white/10 text-gray-400">
@@ -1308,7 +1391,7 @@ export default function App() {
                     <h3 className="font-bold text-sm text-red-400 uppercase">Resultado del último partido:</h3>
                     {leagueMatchData ? (
                       <div className="text-xs text-white mt-1">
-                        <p>{leagueMatchData.isHome ? 'Local' : 'Visitante'} vs {leagueMatchData.opponent.name}: <strong className="text-red-500 font-black text-base">{leagueMatchData.homeGoals} - {leagueMatchData.awayGoals}</strong></p>
+                        <p>{leagueMatchData.isHome ? 'Local' : 'Visitante'} vs {leagueMatchData.opponent?.name}: <strong className="text-red-500 font-black text-base">{leagueMatchData.homeGoals} - {leagueMatchData.awayGoals}</strong></p>
                         <div className="mt-1 text-[11px] text-gray-300">
                           {leagueMatchData.homeScorers?.length > 0 && <p><span className="text-red-400 font-bold">Goles locales:</span> {leagueMatchData.homeScorers.join(', ')}</p>}
                           {leagueMatchData.awayScorers?.length > 0 && <p><span className="text-red-400 font-bold">Goles visitantes:</span> {leagueMatchData.awayScorers.join(', ')}</p>}
@@ -1356,18 +1439,18 @@ export default function App() {
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                       {playoffMatches.map((m, idx) => {
-                        const isUserInMatch = m.team1.isUser || m.team2.isUser;
+                        const isUserInMatch = m.team1?.isUser || m.team2?.isUser;
                         return (
                           <div key={idx} className={`p-4 rounded-xl border flex flex-col justify-between ${isUserInMatch ? 'bg-red-600/20 border-red-500' : 'bg-white/5 border-white/10'}`}>
                             <div className="flex justify-between items-center text-xs font-bold mb-3">
                               <div className="flex items-center gap-2">
-                                <img src={m.team1.logo} alt="" className="w-5 h-5 object-contain" />
-                                <span>{m.team1.name} (⭐ {m.team1.rating})</span>
+                                <img src={m.team1?.logo} alt="" className="w-5 h-5 object-contain" />
+                                <span>{m.team1?.name} (⭐ {m.team1?.rating})</span>
                               </div>
                               <span className="text-gray-500">vs</span>
                               <div className="flex items-center gap-2">
-                                <span>{m.team2.name} (⭐ {m.team2.rating})</span>
-                                <img src={m.team2.logo} alt="" className="w-5 h-5 object-contain" />
+                                <span>{m.team2?.name} (⭐ {m.team2?.rating})</span>
+                                <img src={m.team2?.logo} alt="" className="w-5 h-5 object-contain" />
                               </div>
                             </div>
 
@@ -1719,6 +1802,134 @@ export default function App() {
             >
               CANCELAR
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIGURACIÓN DE ZONAS POST-DRAFT */}
+      {showLeagueSetupModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-[#111] border border-white/10 rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl my-auto">
+            <h2 className="text-xl sm:text-3xl font-black mb-2 text-red-500">CONFIGURACIÓN DE ZONAS (LIGA)</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mb-6">
+              Elegí cómo querés conformar las zonas A y B antes de iniciar el modo liga.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              <button
+                onClick={() => setZoneSetupMode('original')}
+                className={`p-4 rounded-xl border text-left transition cursor-pointer ${zoneSetupMode === 'original' ? 'bg-red-600/30 border-red-500 text-white' : 'bg-white/5 border-white/10 text-gray-400'}`}
+              >
+                <b className="block text-sm sm:text-base text-white">Grupos Originales</b>
+                <span className="text-[11px] text-gray-400">Distribución predefinida</span>
+              </button>
+              <button
+                onClick={() => setZoneSetupMode('manual')}
+                className={`p-4 rounded-xl border text-left transition cursor-pointer ${zoneSetupMode === 'manual' ? 'bg-red-600/30 border-red-500 text-white' : 'bg-white/5 border-white/10 text-gray-400'}`}
+              >
+                <b className="block text-sm sm:text-base text-white">Elegir Equipo por Equipo</b>
+                <span className="text-[11px] text-gray-400">Armar zonas de forma interactiva</span>
+              </button>
+              <button
+                onClick={() => setZoneSetupMode('random')}
+                className={`p-4 rounded-xl border text-left transition cursor-pointer ${zoneSetupMode === 'random' ? 'bg-red-600/30 border-red-500 text-white' : 'bg-white/5 border-white/10 text-gray-400'}`}
+              >
+                <b className="block text-sm sm:text-base text-white">Sorteo al Azar</b>
+                <span className="text-[11px] text-gray-400">Repartir equipos aleatoriamente</span>
+              </button>
+            </div>
+
+            {zoneSetupMode === 'manual' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 max-h-[320px] overflow-y-auto p-2 bg-black/40 rounded-2xl border border-white/10">
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <h4 className="font-bold text-xs text-red-400 mb-2 uppercase">Zona A ({manualZoneA.length})</h4>
+                  <div className="space-y-1">
+                    {manualZoneA.map((t, i) => (
+                      <div key={i} className="text-xs flex justify-between items-center bg-black/40 p-1.5 rounded">
+                        <span>{t.name}</span>
+                        {!t.isUser && (
+                          <button
+                            onClick={() => {
+                              setManualZoneA(manualZoneA.filter((_, idx) => idx !== i));
+                              setUnassignedTeams([...unassignedTeams, t]);
+                            }}
+                            className="text-[10px] text-red-400 hover:underline"
+                          >
+                            Quitar
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <h4 className="font-bold text-xs text-amber-400 mb-2 uppercase">Zona B ({manualZoneB.length})</h4>
+                  <div className="space-y-1">
+                    {manualZoneB.map((t, i) => (
+                      <div key={i} className="text-xs flex justify-between items-center bg-black/40 p-1.5 rounded">
+                        <span>{t.name}</span>
+                        <button
+                          onClick={() => {
+                            setManualZoneB(manualZoneB.filter((_, idx) => idx !== i));
+                            setUnassignedTeams([...unassignedTeams, t]);
+                          }}
+                          className="text-[10px] text-red-400 hover:underline"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <h4 className="font-bold text-xs text-gray-400 mb-2 uppercase">Disponibles ({unassignedTeams.length})</h4>
+                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                    {unassignedTeams.map((t, i) => (
+                      <div key={i} className="text-xs flex justify-between items-center bg-black/40 p-1.5 rounded">
+                        <span className="truncate max-w-[90px]">{t.name}</span>
+                        <div className="flex gap-1 shrink-0">
+                          <button
+                            onClick={() => {
+                              setUnassignedTeams(unassignedTeams.filter((_, idx) => idx !== i));
+                              setManualZoneA([...manualZoneA, t]);
+                            }}
+                            className="text-[10px] px-1 bg-red-600/40 rounded hover:bg-red-600"
+                          >
+                            +A
+                          </button>
+                          <button
+                            onClick={() => {
+                              setUnassignedTeams(unassignedTeams.filter((_, idx) => idx !== i));
+                              setManualZoneB([...manualZoneB, t]);
+                            }}
+                            className="text-[10px] px-1 bg-amber-600/40 rounded hover:bg-amber-600"
+                          >
+                            +B
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowLeagueSetupModal(false)}
+                className="flex-1 py-3 bg-white/10 hover:bg-white/20 transition font-bold rounded-xl text-xs cursor-pointer"
+              >
+                CANCELAR
+              </button>
+              <button
+                onClick={() => initLeagueTournamentWithConfig(zoneSetupMode, manualZoneA, manualZoneB)}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 transition font-black rounded-xl text-xs shadow-[0_0_20px_rgba(220,38,38,0.4)] cursor-pointer"
+              >
+                INICIAR LIGA CON ESTA CONFIGURACIÓN →
+              </button>
+            </div>
           </div>
         </div>
       )}
